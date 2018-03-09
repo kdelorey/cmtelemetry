@@ -36,13 +36,13 @@ func StartTelemetry(address string) (telemetry *Telemetry, err error) {
 	return
 }
 
+// Close will stop the connection.
+func (telemetry *Telemetry) Close() {
+	telemetry.Close()
+}
+
 func (telemetry *Telemetry) telemetryRoutine() {
 	for {
 		telemetry.udp.ReadFromUDP(telemetry.buffer)
 	}
-}
-
-// Close will stop the connection.
-func (telemetry *Telemetry) Close() {
-	telemetry.Close()
 }
