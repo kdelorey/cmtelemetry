@@ -31,12 +31,12 @@ func StartTelemetry(address string) (telemetry *Telemetry, err error) {
 
 	telemetry = &Telemetry{udp: udp, buffer: make([]byte, 264)}
 
-	//go telemetry.telemetryRotine()
+	//go telemetry.telemetryRoutine()
 
 	return
 }
 
-func (telemetry *Telemetry) telemetryRotine() {
+func (telemetry *Telemetry) telemetryRoutine() {
 	for {
 		telemetry.udp.ReadFromUDP(telemetry.buffer)
 	}
