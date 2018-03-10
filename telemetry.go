@@ -10,6 +10,7 @@ import (
 type Telemetry struct {
 	udp    *net.UDPConn
 	buffer []byte
+	quit   chan struct{}
 }
 
 // StartDefaultTelemetry will open the default udp port and begin processing
@@ -20,7 +21,7 @@ func StartDefaultTelemetry() (*Telemetry, error) {
 
 // StartTelemetry will open a udp port up at the specified location and begin
 // processing telemetry from Codemasters' games.
-func StartTelemetry(address string) (telemetry *Telemetry, err error) {
+func StartTelemetry(address string) (t *Telemetry, err error) {
 	addr, err := net.ResolveUDPAddr("udp", address)
 
 	if err != nil {
@@ -33,29 +34,41 @@ func StartTelemetry(address string) (telemetry *Telemetry, err error) {
 		return
 	}
 
-	telemetry = &Telemetry{udp: udp, buffer: make([]byte, 264)}
+	t = &Telemetry{
+		udp:    udp,
+		buffer: make([]byte, 264),
+		quit:   make(chan struct{}),
+	}
 
-	//go telemetry.telemetryRoutine()
+	go t.telemetryRoutine()
 
 	return
 }
 
 // Close will stop the connection.
-func (telemetry *Telemetry) Close() {
-	telemetry.Close()
+func (t *Telemetry) Close() {
+	close(t.quit)
+	t.udp.Close()
 }
 
-// GetFieldValue todo
-func (telemetry *Telemetry) GetFieldValue(field TelemetryField) float32 {
+// GetFieldValue will retrun the value of the specified telemetry field.
+func (t *Telemetry) GetFieldValue(field TelemetryField) float32 {
 	offset := int32(field) * 4
 
-	bits := binary.LittleEndian.Uint32(telemetry.buffer[offset : offset+4])
+	bits := binary.LittleEndian.Uint32(t.buffer[offset : offset+4])
 
 	return math.Float32frombits(bits)
 }
 
-func (telemetry *Telemetry) telemetryRoutine() {
+func (t *Telemetry) telemetryRoutine() {
 	for {
-		telemetry.udp.ReadFromUDP(telemetry.buffer)
+		select {
+		case <-t.quit:
+			return
+
+		default:
+			t.udp.ReadFromUDP(t.buffer)
+			break
+		}
 	}
 }
