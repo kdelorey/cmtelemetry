@@ -1,4 +1,4 @@
-package dirt
+package cmtelemetry
 
 import (
 	"encoding/binary"

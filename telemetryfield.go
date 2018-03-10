@@ -1,4 +1,4 @@
-package dirt
+package cmtelemetry
 
 // TelemetryField represents the id of a telemetry field.
 type TelemetryField int16
