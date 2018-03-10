@@ -41,6 +41,11 @@ func (telemetry *Telemetry) Close() {
 	telemetry.Close()
 }
 
+// GetFieldValue todo
+func (telemetry *Telemetry) GetFieldValue(field TelemetryField) float32 {
+	return 0.0
+}
+
 func (telemetry *Telemetry) telemetryRoutine() {
 	for {
 		telemetry.udp.ReadFromUDP(telemetry.buffer)
