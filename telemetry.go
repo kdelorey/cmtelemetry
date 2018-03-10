@@ -1,6 +1,10 @@
 package dirt
 
-import "net"
+import (
+	"encoding/binary"
+	"math"
+	"net"
+)
 
 // Telemetry is the basic
 type Telemetry struct {
@@ -43,7 +47,11 @@ func (telemetry *Telemetry) Close() {
 
 // GetFieldValue todo
 func (telemetry *Telemetry) GetFieldValue(field TelemetryField) float32 {
-	return 0.0
+	offset := int32(field) * 4
+
+	bits := binary.LittleEndian.Uint32(telemetry.buffer[offset : offset+4])
+
+	return math.Float32frombits(bits)
 }
 
 func (telemetry *Telemetry) telemetryRoutine() {
