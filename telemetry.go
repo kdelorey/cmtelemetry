@@ -11,6 +11,7 @@ type Telemetry struct {
 	udp    *net.UDPConn
 	buffer []byte
 	quit   chan struct{}
+	rec    chan interface{}
 }
 
 // StartDefaultTelemetry will open the default udp port and begin processing
@@ -38,6 +39,7 @@ func StartTelemetry(address string) (t *Telemetry, err error) {
 		udp:    udp,
 		buffer: make([]byte, 264),
 		quit:   make(chan struct{}),
+		rec:    make(chan interface{}),
 	}
 
 	go t.telemetryRoutine()
@@ -60,6 +62,10 @@ func (t *Telemetry) GetFieldValue(field TelemetryField) float32 {
 	return math.Float32frombits(bits)
 }
 
+func (t *Telemetry) OnFrameReceived() <-chan interface{} {
+	return t.rec
+}
+
 func (t *Telemetry) telemetryRoutine() {
 	for {
 		select {
@@ -68,6 +74,7 @@ func (t *Telemetry) telemetryRoutine() {
 
 		default:
 			t.udp.ReadFromUDP(t.buffer)
+			t.rec <- 0
 			break
 		}
 	}
