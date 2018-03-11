@@ -17,7 +17,7 @@ type Telemetry struct {
 // TelemetryAccessor is an interface that is responsible for accessing the current
 // telemetry values.
 type TelemetryAccessor interface {
-	GetFieldValue(field TelemetryField) float32
+	GetFieldValue(field TelemetryField) (float32, error)
 }
 
 // GatherDefaultTelemetry will open the default udp port and begin processing

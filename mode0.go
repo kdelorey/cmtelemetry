@@ -1,14 +1,18 @@
 package cmtelemetry
 
+import (
+	"errors"
+)
+
 type mode0Accessor struct {
 	buffer *[]byte
 }
 
 func createMode0Accessor() (a TelemetryAccessor, b []byte) {
-	return
+	panic("not supported yet")
 }
 
-func (a mode0Accessor) GetFieldValue(field TelemetryField) float32 {
+func (a mode0Accessor) GetFieldValue(field TelemetryField) (float32, error) {
 	// Format:
 	// 	- total_time, 			uint32, scale 1000.0
 	//	- angular_velocity_x, 	float, 	scale -1
@@ -28,5 +32,5 @@ func (a mode0Accessor) GetFieldValue(field TelemetryField) float32 {
 	//	- position_y,			int32, 	scint325535
 	//	- position_z,			int32, 	scale 65535
 	//	- fourcc text="ToCA"
-	return 0.0
+	return 0, errors.New("not supported yet")
 }

@@ -15,10 +15,10 @@ func createMode3Accessor() (a TelemetryAccessor, b []byte) {
 	return
 }
 
-func (a mode3Accessor) GetFieldValue(field TelemetryField) float32 {
+func (a mode3Accessor) GetFieldValue(field TelemetryField) (float32, error) {
 	offset := int32(field) * 4
 
 	bits := binary.LittleEndian.Uint32((*a.buffer)[offset : offset+4])
 
-	return math.Float32frombits(bits)
+	return math.Float32frombits(bits), nil
 }
