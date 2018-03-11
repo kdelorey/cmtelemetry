@@ -9,7 +9,7 @@ type mode3Accessor struct {
 	buffer *[]byte
 }
 
-func createMode3Accessor() (a mode3Accessor, b []byte) {
+func createMode3Accessor() (a TelemetryAccessor, b []byte) {
 	b = make([]byte, 264)
 	a = mode3Accessor{buffer: &b}
 	return
