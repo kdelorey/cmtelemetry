@@ -8,6 +8,8 @@ import (
 
 // Telemetry is the basic
 type Telemetry struct {
+	dataAccessor TelemetryAccessor
+
 	udp    *net.UDPConn
 	buffer []byte
 	quit   chan struct{}
@@ -18,6 +20,10 @@ type Telemetry struct {
 // telemetry values.
 type TelemetryAccessor interface {
 	GetFieldValue(field TelemetryField) float32
+}
+
+type mode3Accessor struct {
+	buffer *[]byte
 }
 
 // GatherDefaultTelemetry will open the default udp port and begin processing
@@ -41,11 +47,14 @@ func GatherTelemetry(address string, frames chan TelemetryAccessor) (t *Telemetr
 		return
 	}
 
+	acc, buff := createMode3Accessor()
+
 	t = &Telemetry{
-		udp:    udp,
-		buffer: make([]byte, 264),
-		quit:   make(chan struct{}),
-		rec:    frames,
+		dataAccessor: acc,
+		udp:          udp,
+		buffer:       buff,
+		quit:         make(chan struct{}),
+		rec:          frames,
 	}
 
 	go t.telemetryRoutine()
@@ -60,15 +69,6 @@ func (t *Telemetry) Close() {
 	t.udp.Close()
 }
 
-// GetFieldValue will retrun the value of the specified telemetry field.
-func (t *Telemetry) GetFieldValue(field TelemetryField) float32 {
-	offset := int32(field) * 4
-
-	bits := binary.LittleEndian.Uint32(t.buffer[offset : offset+4])
-
-	return math.Float32frombits(bits)
-}
-
 func (t *Telemetry) telemetryRoutine() {
 	for {
 		select {
@@ -77,8 +77,22 @@ func (t *Telemetry) telemetryRoutine() {
 
 		default:
 			t.udp.ReadFromUDP(t.buffer)
-			t.rec <- t
+			t.rec <- t.dataAccessor
 			break
 		}
 	}
+}
+
+func createMode3Accessor() (a mode3Accessor, b []byte) {
+	b = make([]byte, 264)
+	a = mode3Accessor{buffer: &b}
+	return
+}
+
+func (a mode3Accessor) GetFieldValue(field TelemetryField) float32 {
+	offset := int32(field) * 4
+
+	bits := binary.LittleEndian.Uint32((*a.buffer)[offset : offset+4])
+
+	return math.Float32frombits(bits)
 }
