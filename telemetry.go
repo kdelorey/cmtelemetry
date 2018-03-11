@@ -11,18 +11,24 @@ type Telemetry struct {
 	udp    *net.UDPConn
 	buffer []byte
 	quit   chan struct{}
-	rec    chan interface{}
+	rec    chan TelemetryAccessor
 }
 
-// StartDefaultTelemetry will open the default udp port and begin processing
+// TelemetryAccessor is an interface that is responsible for accessing the current
+// telemetry values.
+type TelemetryAccessor interface {
+	GetFieldValue(field TelemetryField) float32
+}
+
+// GatherDefaultTelemetry will open the default udp port and begin processing
 // telemetry from Codemasters' games.
-func StartDefaultTelemetry() (*Telemetry, error) {
-	return StartTelemetry(":20777")
+func GatherDefaultTelemetry(frames chan TelemetryAccessor) (*Telemetry, error) {
+	return GatherTelemetry(":20777", frames)
 }
 
-// StartTelemetry will open a udp port up at the specified location and begin
+// GatherTelemetry will open a udp port up at the specified location and begin
 // processing telemetry from Codemasters' games.
-func StartTelemetry(address string) (t *Telemetry, err error) {
+func GatherTelemetry(address string, frames chan TelemetryAccessor) (t *Telemetry, err error) {
 	addr, err := net.ResolveUDPAddr("udp", address)
 
 	if err != nil {
@@ -39,7 +45,7 @@ func StartTelemetry(address string) (t *Telemetry, err error) {
 		udp:    udp,
 		buffer: make([]byte, 264),
 		quit:   make(chan struct{}),
-		rec:    make(chan interface{}),
+		rec:    frames,
 	}
 
 	go t.telemetryRoutine()
@@ -49,6 +55,7 @@ func StartTelemetry(address string) (t *Telemetry, err error) {
 
 // Close will stop the connection.
 func (t *Telemetry) Close() {
+	close(t.rec)
 	close(t.quit)
 	t.udp.Close()
 }
@@ -62,10 +69,6 @@ func (t *Telemetry) GetFieldValue(field TelemetryField) float32 {
 	return math.Float32frombits(bits)
 }
 
-func (t *Telemetry) OnFrameReceived() <-chan interface{} {
-	return t.rec
-}
-
 func (t *Telemetry) telemetryRoutine() {
 	for {
 		select {
@@ -74,7 +77,7 @@ func (t *Telemetry) telemetryRoutine() {
 
 		default:
 			t.udp.ReadFromUDP(t.buffer)
-			t.rec <- 0
+			t.rec <- t
 			break
 		}
 	}
