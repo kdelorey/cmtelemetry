@@ -5,7 +5,8 @@ import (
 )
 
 type mode0Accessor struct {
-	buffer *[]byte
+	buffer       *[]byte
+	fieldOffsets map[TelemetryField]uint32
 }
 
 func createMode0Accessor() (a TelemetryAccessor, b []byte) {
