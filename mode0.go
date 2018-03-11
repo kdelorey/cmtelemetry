@@ -14,6 +14,12 @@ func createMode0Accessor() (a TelemetryAccessor, b []byte) {
 }
 
 func (a mode0Accessor) GetFieldValue(field TelemetryField) (float32, error) {
+	_, ok := a.fieldOffsets[field]
+
+	if !ok {
+		return 0.0, errors.New("invalid field for mode 0")
+	}
+
 	// Format:
 	// 	- total_time, 			uint32, scale 1000.0
 	//	- angular_velocity_x, 	float, 	scale -1
