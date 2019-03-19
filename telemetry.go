@@ -23,12 +23,34 @@ type TelemetryAccessor interface {
 // GatherDefaultTelemetry will open the default udp port and begin processing
 // telemetry from Codemasters' games.
 func GatherDefaultTelemetry(frames chan TelemetryAccessor) (*Telemetry, error) {
-	return GatherTelemetry(":20777", frames)
+	return GatherMode3Telemetry(":20777", frames)
 }
 
-// GatherTelemetry will open a udp port up at the specified location and begin
+// GatherMode0Telemetry will open a udp port up at the specified location and begin
 // processing telemetry from Codemasters' games.
-func GatherTelemetry(address string, frames chan TelemetryAccessor) (t *Telemetry, err error) {
+func GatherMode0Telemetry(address string, frames chan TelemetryAccessor) (t *Telemetry, err error) {
+	acc, buff := createMode0Accessor()
+
+	return gatherTelemetry(
+		address,
+		frames,
+		acc,
+		buff)
+}
+
+// GatherMode3Telemetry will open a udp port up at the specified location and begin
+// processing telemetry from Codemasters' games.
+func GatherMode3Telemetry(address string, frames chan TelemetryAccessor) (t *Telemetry, err error) {
+	acc, buff := createMode3Accessor()
+
+	return gatherTelemetry(
+		address,
+		frames,
+		acc,
+		buff)
+}
+
+func gatherTelemetry(address string, frames chan TelemetryAccessor, accessor TelemetryAccessor, buffer []byte) (t *Telemetry, err error) {
 	addr, err := net.ResolveUDPAddr("udp", address)
 
 	if err != nil {
@@ -41,12 +63,10 @@ func GatherTelemetry(address string, frames chan TelemetryAccessor) (t *Telemetr
 		return
 	}
 
-	acc, buff := createMode3Accessor()
-
 	t = &Telemetry{
-		dataAccessor: acc,
+		dataAccessor: accessor,
 		udp:          udp,
-		buffer:       buff,
+		buffer:       buffer,
 		quit:         make(chan struct{}),
 		rec:          frames,
 	}

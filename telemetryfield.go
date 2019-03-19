@@ -264,4 +264,31 @@ const (
 
 	// MaxGears is the number of forward gears available in the vehicle.
 	MaxGears
+
+	// AngularVelocityX is the X-component of the world-space angular velocity of the vehicle (in radians/s).
+	AngularVelocityX
+
+	// AngularVelocityY is the Y-component of the world-space angular velocity of the vehicle (in radians/s).
+	AngularVelocityY
+
+	// AngularVelocityZ is the Z-component of the world-space angular velocity of the vehicle (in radians/s).
+	AngularVelocityZ
+
+	// Yaw is the yaw of the vehicle (in radians).
+	Yaw
+
+	// Pitch is the pitch of the vehicle (in radians).
+	Pitch
+
+	// Roll is the roll of the vehicle (in radians).
+	Roll
+
+	// AccelerationX is the X-component of the world-space accelleration of the vehicle (in m/s^2).
+	AccelerationX
+
+	// AccelerationY is the Y-component of the world-space accelleration of the vehicle (in m/s^2).
+	AccelerationY
+
+	// AccelerationZ is the Z-component of the world-space accelleration of the vehicle (in m/s^2).
+	AccelerationZ
 )
